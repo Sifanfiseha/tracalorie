@@ -10,6 +10,7 @@ class CalorieTracker {
     this._displayCaloriesBurned();
     this._displayCaloriesRemaining();
     this._displayCaloriesProgress();
+    document.getElementById("limit").value = this._caloriesLimit;
   }
   loadItems() {
     this._meals.forEach((item) => {
@@ -40,11 +41,10 @@ class CalorieTracker {
     const index = this._meals.findIndex((meal) => meal.id === id);
     if (index != -1) {
       const meal = this._meals[index];
-      console.log(this._meals);
       this._totalCalories -= meal.calories;
       Storage.updateTotalCalories(this._totalCalories);
       this._meals.splice(index, 1);
-      console.log(this._meals);
+      Storage.removeMeal(id);
       this._render();
     }
   }
@@ -54,9 +54,11 @@ class CalorieTracker {
     this._totalCalories += work.calories;
     Storage.updateTotalCalories(this._totalCalories);
     this._workout.splice(index, 1);
+    Storage.removeWorkout(id);
     this._render();
   }
   reset() {
+    Storage.clearAll();
     this._totalCalories = 0;
     this._meals = [];
     this._workout = [];
@@ -233,6 +235,15 @@ class Storage {
     meals.push(meal);
     localStorage.setItem("meals", JSON.stringify(meals));
   }
+  static removeMeal(id) {
+    const meals = Storage.getMeals();
+    meals.forEach((item, index) => {
+      if (item.id === id) {
+        meals.splice(index, 1);
+      }
+    });
+    localStorage.setItem("meals", JSON.stringify(meals));
+  }
   static getWorkout() {
     let workouts;
     if (localStorage.getItem("workouts") === null) {
@@ -251,6 +262,21 @@ class Storage {
     }
     workouts.push(workout);
     localStorage.setItem("workouts", JSON.stringify(workouts));
+  }
+  static removeWorkout(id) {
+    const workouts = Storage.getWorkout();
+    workouts.forEach((item, index) => {
+      if (item.id === id) {
+        workouts.splice(index, 1);
+      }
+    });
+    localStorage.setItem("workouts", JSON.stringify(workouts));
+  }
+  static clearAll() {
+    localStorage.removeItem("totalcalories");
+    localStorage.removeItem("meals");
+    localStorage.removeItem("workouts");
+    localStorage.removeItem("totoalCalories");
   }
 }
 
