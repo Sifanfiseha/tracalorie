@@ -2,8 +2,8 @@ class CalorieTracker {
   constructor() {
     this._caloriesLimit = Storage.getCaloriesLimit();
     this._totalCalories = Storage.getTotalCalories(0);
-    this._meals = [];
-    this._workout = [];
+    this._meals = Storage.getMeals();
+    this._workout = Storage.getWorkout();
     this._displayCaloriesTotal();
     this._displayCaloriesLimit();
     this._displayCaloriesConsumed();
@@ -11,11 +11,20 @@ class CalorieTracker {
     this._displayCaloriesRemaining();
     this._displayCaloriesProgress();
   }
+  loadItems() {
+    this._meals.forEach((item) => {
+      this._displayNewMeal(item);
+    });
+    this._workout.forEach((item) => {
+      this._displayNewWorkout(item);
+    });
+  }
   // Public Methods
   addMeal(meal) {
     this._meals.push(meal);
     this._totalCalories += meal.calories;
     Storage.updateTotalCalories(this._totalCalories);
+    Storage.saveMeals(meal);
     this._displayNewMeal(meal);
     this._render();
   }
@@ -23,6 +32,7 @@ class CalorieTracker {
     this._workout.push(workout);
     this._totalCalories -= workout.calories;
     Storage.updateTotalCalories(this._totalCalories);
+    Storage.saveWorkout(workout);
     this._displayNewWorkout(workout);
     this._render();
   }
@@ -204,11 +214,53 @@ class Storage {
   static updateTotalCalories(calories) {
     localStorage.setItem("totoalCalories", calories);
   }
+  static getMeals() {
+    let meals;
+    if (localStorage.getItem("meals") === null) {
+      meals = [];
+    } else {
+      meals = JSON.parse(localStorage.getItem("meals"));
+    }
+    return meals;
+  }
+  static saveMeals(meal) {
+    let meals;
+    if (localStorage.getItem("meals") === null) {
+      meals = [];
+    } else {
+      meals = JSON.parse(localStorage.getItem("meals"));
+    }
+    meals.push(meal);
+    localStorage.setItem("meals", JSON.stringify(meals));
+  }
+  static getWorkout() {
+    let workouts;
+    if (localStorage.getItem("workouts") === null) {
+      workouts = [];
+    } else {
+      workouts = JSON.parse(localStorage.getItem("workouts"));
+    }
+    return workouts;
+  }
+  static saveWorkout(workout) {
+    let workouts;
+    if (localStorage.getItem("workouts") === null) {
+      workouts = [];
+    } else {
+      workouts = JSON.parse(localStorage.getItem("workouts"));
+    }
+    workouts.push(workout);
+    localStorage.setItem("workouts", JSON.stringify(workouts));
+  }
 }
 
 class App {
   constructor() {
     this._tracker = new CalorieTracker();
+    this._loadEventListners();
+    this._tracker.loadItems();
+  }
+  _loadEventListners() {
     document
       .getElementById("meal-form")
       .addEventListener("submit", this._newItem.bind(this, "meal"));
