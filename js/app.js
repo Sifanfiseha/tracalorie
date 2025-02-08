@@ -64,7 +64,7 @@ class CalorieTracker {
     } else {
       caloriesRemainingEl.parentElement.parentElement.classList.add("bg-light");
       progressEl.classList.add("bg-success");
-      progressEl.classList.remove("bg-denger");
+      progressEl.classList.remove("bg-danger");
       caloriesRemainingEl.parentElement.parentElement.classList.remove(
         "bg-danger"
       );
@@ -99,12 +99,51 @@ class Workout {
   }
 }
 
-const tracker = new CalorieTracker();
-
-const run = new Workout("ran", 320);
-
-const luch = new Meal("lunch", 3000);
-
-tracker.addMeal(luch);
-
-tracker.addWorkout(run);
+class App {
+  constructor() {
+    this._tracker = new CalorieTracker();
+    document
+      .getElementById("meal-form")
+      .addEventListener("submit", this._newMeal.bind(this));
+    document
+      .getElementById("workout-form")
+      .addEventListener("submit", this._newWorkout.bind(this));
+  }
+  _newMeal(e) {
+    e.preventDefault();
+    const name = document.getElementById("meal-name");
+    const calories = document.getElementById("meal-calories");
+    // validation
+    if (name.value === "" || calories.value === 0) {
+      alert("please fill in all the fileds!");
+      return;
+    }
+    const meal = new Meal(name.value, +calories.value);
+    this._tracker.addMeal(meal);
+    name.value = "";
+    calories.value = "";
+    const collapsMeal = document.getElementById("collapse-meal");
+    const bscollapse = new bootstrap.Collapse(collapsMeal, {
+      toggle: true,
+    });
+  }
+  _newWorkout(e) {
+    e.preventDefault();
+    const name = document.getElementById("workout-name");
+    const calories = document.getElementById("workout-calories");
+    // validation
+    if (name.value === "" || calories.value === 0) {
+      alert("please fill in all the fileds!");
+      return;
+    }
+    const workout = new Workout(name.value, +calories.value);
+    this._tracker.addWorkout(workout);
+    name.value = "";
+    calories.value = "";
+    const collapsWorkout = document.getElementById("collapse-workout");
+    const bscollapse = new bootstrap.Collapse(collapsWorkout, {
+      toggle: true,
+    });
+  }
+}
+const app = new App();
