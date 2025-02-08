@@ -43,6 +43,12 @@ class CalorieTracker {
     this._workout.splice(index, 1);
     this._render();
   }
+  reset() {
+    this._totalCalories = 0;
+    this._meals = [];
+    this._workout = [];
+    this._render();
+  }
   // private methods
   _displayCaloriesTotal() {
     const totalCaloriesEl = document.getElementById("calories-total");
@@ -179,6 +185,15 @@ class App {
     document
       .getElementById("workout-items")
       .addEventListener("click", this._removeItem.bind(this, "workout"));
+    document
+      .getElementById("filter-meals")
+      .addEventListener("keyup", this._filterItems.bind(this, "meal"));
+    document
+      .getElementById("filter-workouts")
+      .addEventListener("keyup", this._filterItems.bind(this, "workout"));
+    document
+      .getElementById("reset")
+      .addEventListener("click", this._reset.bind(this));
   }
   _newItem(type, e) {
     e.preventDefault();
@@ -216,6 +231,25 @@ class App {
         e.target.closest(".card").remove();
       }
     }
+  }
+  _filterItems(type, e) {
+    const text = e.target.value.toLowerCase();
+    document.querySelectorAll(`#${type}-items .card`).forEach((item) => {
+      const name =
+        item.firstElementChild.firstElementChild.textContent.toLocaleLowerCase();
+      if (name.indexOf(text) !== -1) {
+        item.style.display = "block";
+      } else {
+        item.style.display = "none";
+      }
+    });
+  }
+  _reset() {
+    this._tracker.reset();
+    document.getElementById("meal-items").innerHTML = "";
+    document.getElementById("workout-items").innerHTML = "";
+    document.getElementById("filter-meals").value = "";
+    document.getElementById("filter-workouts").value = "";
   }
 }
 const app = new App();
